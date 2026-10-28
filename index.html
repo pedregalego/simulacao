@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado ENEM - 40 Questões + Redação</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; color: #222; }
+  .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+  h1 { text-align: center; color: #1a3d6d; margin-bottom: 5px; }
+  .sub { text-align: center; color: #666; margin-bottom: 25px; }
+  .instrucoes { background: #eef4ff; border-left: 5px solid #1a3d6d; padding: 15px; border-radius: 6px; margin-bottom: 25px; font-size: 14px; }
+  .dados-aluno { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+  .dados-aluno input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+  .area { margin-bottom: 30px; }
+  .area h2 { background: #1a3d6d; color: #fff; padding: 10px 15px; border-radius: 6px; font-size: 17px; margin-bottom: 15px; }
+  .questao { background: #fafbfc; border: 1px solid #e3e6ea; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+  .questao .enunciado { font-weight: 600; margin-bottom: 10px; font-size: 14.5px; }
+  .alternativas label { display: block; padding: 7px 10px; margin: 4px 0; border-radius: 6px; cursor: pointer; font-size: 14px; border: 1px solid transparent; }
+  .alternativas label:hover { background: #eef4ff; }
+  .alternativas input { margin-right: 8px; }
+  .redacao-box textarea { width: 100%; min-height: 320px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; resize: vertical; }
+  .tema-redacao { background: #fff8e1; border-left: 5px solid #f0ad4e; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+  .tema-redacao h3 { margin: 0 0 8px; color: #8a6d3b; }
+  .btn { display: block; width: 100%; padding: 16px; background: #1a3d6d; color: #fff; border: none; border-radius: 8px; font-size: 17px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+  .btn:hover { background: #14305a; }
+  .btn:disabled { background: #999; cursor: not-allowed; }
+  .resultado { display: none; margin-top: 25px; padding: 20px; border-radius: 10px; background: #eef4ff; border: 2px solid #1a3d6d; }
+  .resultado h2 { text-align: center; color: #1a3d6d; }
+  .nota-final { text-align: center; font-size: 26px; font-weight: bold; color: #1a3d6d; margin: 15px 0; }
+  .detalhes { font-size: 14px; line-height: 1.8; }
+  .detalhes .linha { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #ccc; }
+  .gabarito-item { font-size: 12px; color: #555; margin: 2px 0; }
+  .certa { color: #1a7f37; font-weight: bold; }
+  .errada { color: #c62828; font-weight: bold; }
+  @media (max-width: 600px) { .dados-aluno { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📘 SIMULADO ENEM</h1>
+  <p class="sub">40 Questões Objetivas + Redação</p>
+
+  <div class="instrucoes">
+    <strong>Instruções:</strong><br>
+    • Marque apenas uma alternativa por questão.<br>
+    • A redação deve ter entre 20 e 30 linhas.<br>
+    • Ao finalizar, clique em <strong>"Finalizar Simulado e Gerar PDF"</strong>.<br>
+    • O PDF será baixado automaticamente — envie-o para o professor.
+  </div>
+
+  <div class="dados-aluno">
+    <input type="text" id="nomeAluno" placeholder="Nome do aluno">
+    <input type="text" id="turmaAluno" placeholder="Turma / Série">
+  </div>
+
+  <div id="questoesContainer"></div>
+
+  <div class="area">
+    <h2>✍️ REDAÇÃO</h2>
+    <div class="tema-redacao">
+      <h3>Tema: O desafio da inclusão digital no Brasil contemporâneo</h3>
+      <p style="font-size:14px; margin:0;">
+        A partir dos conhecimentos adquiridos, redija um texto dissertativo-argumentativo sobre o tema 
+        <strong>"O desafio da inclusão digital no Brasil contemporâneo"</strong>, apresentando proposta de intervenção 
+        que respeite os direitos humanos. Mínimo de 20 e máximo de 30 linhas.
+      </p>
+    </div>
+    <div class="redacao-box">
+      <textarea id="redacao" placeholder="Escreva sua redação aqui..."></textarea>
+    </div>
+  </div>
+
+  <button class="btn" id="finalizarBtn" onclick="finalizarSimulado()">Finalizar Simulado e Gerar PDF</button>
+
+  <div class="resultado" id="resultado">
+    <h2>📊 Resultado do Simulado</h2>
+    <div class="nota-final" id="notaFinal"></div>
+    <div class="detalhes" id="detalhes"></div>
+  </div>
+</div>
+
+<script>
+// ================= BANCO DE QUESTÕES (40) =================
+const questoes = [
+  // LINGUAGENS (10)
+  { area:"Linguagens", q:"1. No texto: 'O silêncio da cidade era ensurdecedor.', a figura de linguagem presente é:", alt:["Metonímia","Paradoxo","Hipérbole","Eufemismo","Ironia"], correta:1 },
+  { area:"Linguagens", q:"2. A função da linguagem que centra-se no destinatário, buscando convencê-lo, é a:", alt:["Emotiva","Referencial","Conativa (apelativa)","Metalinguística","Fática"], correta:2 },
+  { area:"Linguagens", q:"3. Assinale a frase com emprego CORRETO da crase:", alt:["Vou à Brasília amanhã.","Entreguei o livro à ela.","Refiro-me àquela situação.","Cheguei à pé.","Assisti à o filme."], correta:2 },
+  { area:"Linguagens", q:"4. O Modernismo brasileiro da 1ª fase (1922) caracterizou-se por:", alt:["Idealização da mulher e do amor.","Ruptura com o academicismo e valorização da identidade nacional.","Uso exclusivo de formas fixas.","Pessimismo e negação da realidade brasileira.","Retorno ao Barroco."], correta:1 },
+  { area:"Linguagens", q:"5. Na literatura, o Romantismo brasileiro teve como marco inicial:", alt:["O Guarani, de José de Alencar","Suspiros Poéticos e Saudades, de Gonçalves de Magalhães","Iracema, de José de Alencar","A Moreninha, de Joaquim Manuel de Macedo","Cantos, de Castro Alves"], correta:1 },
+  { area:"Linguagens", q:"6. No trecho 'Ele é um leão nas negociações', há:", alt:["Comparação","Metonímia","Metáfora","Antítese","Pleonasmo"], correta:2 },
+  { area:"Linguagens", q:"7. O gênero textual que tem como objetivo informar de forma objetiva, sem opinião, é:", alt:["Crônica","Notícia","Editorial","Poema","Conto"], correta:1 },
+  { area:"Linguagens", q:"8. Indique a oração com sujeito indeterminado:", alt:["Os alunos estudaram muito.","Faz calor em Manaus.","Roubaram minha carteira.","A menina sorriu.","Nós viajamos ontem."], correta:2 },
+  { area:"Linguagens", q:"9. O Arcadismo brasileiro valorizava:", alt:["O misticismo e a morte.","O bucolismo, a simplicidade e o carpe diem.","A crítica social urbana.","A linguagem coloquial e experimental.","O pessimismo e a angústia."], correta:1 },
+  { area:"Linguagens", q:"10. Na frase 'Vendi meu carro e comprei uma moto', a conjunção 'e' indica:", alt:["Oposição","Alternância","Adição","Conclusão","Explicação"], correta:2 },
+
+  // HUMANAS (10)
+  { area:"Ciências Humanas", q:"11. A Revolução Industrial do século XVIII teve início na:", alt:["França","Alemanha","Inglaterra","Itália","Estados Unidos"], correta:2 },
+  { area:"Ciências Humanas", q:"12. O período da História do Brasil entre 1937 e 1945 é conhecido como:", alt:["República Velha","Era Vargas (Estado Novo)","Ditadura Militar","República Nova","Governo Juscelino"], correta:1 },
+  { area:"Ciências Humanas", q:"13. O processo de globalização caracteriza-se por:", alt:["Isolamento econômico dos países.","Integração econômica, cultural e informacional entre nações.","Fim do comércio internacional.","Redução das desigualdades sociais.","Fortalecimento do modelo feudal."], correta:1 },
+  { area:"Ciências Humanas", q:"14. A Constituição de 1988, conhecida como 'Constituição Cidadã', destaca-se por:", alt:["Restringir direitos trabalhistas.","Ampliar direitos sociais e políticos.","Estabelecer o voto censitário.","Implantar o regime monárquico.","Extinguir os partidos políticos."], correta:1 },
+  { area:"Ciências Humanas", q:"15. O bloco econômico formado por Brasil, Argentina, Paraguai e Uruguai é o:", alt:["UE","NAFTA","MERCOSUL","APEC","BRICS"], correta:2 },
+  { area:"Ciências Humanas", q:"16. A Guerra Fria foi um conflito:", alt:["Militar direto entre EUA e URSS.","Ideológico, econômico e político entre EUA e URSS.","Religioso entre Oriente e Ocidente.","Comercial entre Europa e Ásia.","Armado entre potências europeias."], correta:1 },
+  { area:"Ciências Humanas", q:"17. O movimento das Diretas Já (1984) reivindicava:", alt:["A independência do Brasil.","Eleições diretas para presidente.","O fim da escravidão.","A criação do SUS.","A separação de São Paulo."], correta:1 },
+  { area:"Ciências Humanas", q:"18. A urbanização acelerada nos países em desenvolvimento gerou:", alt:["Redução das favelas.","Fortalecimento da agricultura familiar.","Problemas como favelização e déficit habitacional.","Distribuição igualitária da renda.","Fim das migrações internas."], correta:2 },
+  { area:"Ciências Humanas", q:"19. O Iluminismo defendia:", alt:["O absolutismo monárquico.","A razão como instrumento de transformação social.","O poder divino dos reis.","A censura das ideias.","O mercantilismo como única política."], correta:1 },
+  { area:"Ciências Humanas", q:"20. A ONU foi criada em 1945 com o objetivo de:", alt:["Implantar o socialismo no mundo.","Manter a paz e a cooperação internacional.","Regular o comércio de armas.","Criar o euro.","Incentivar o colonialismo."], correta:1 },
+
+  // NATUREZA (10)
+  { area:"Ciências da Natureza", q:"21. A organela responsável pela respiração celular é a:", alt:["Ribossomo","Lisossomo","Mitocôndria","Complexo de Golgi","Núcleo"], correta:2 },
+  { area:"Ciências da Natureza", q:"22. A lei de Newton que afirma 'ação e reação' é a:", alt:["1ª Lei","2ª Lei","3ª Lei","4ª Lei","Lei da gravitação"], correta:2 },
+  { area:"Ciências da Natureza", q:"23. O pH de uma solução neutra é:", alt:["0","7","14","10","5"], correta:1 },
+  { area:"Ciências da Natureza", q:"24. O processo de fotossíntese ocorre principalmente:", alt:["Nas raízes","Nos cloroplastos","Nas mitocôndrias","No núcleo","No vacúolo"], correta:1 },
+  { area:"Ciências da Natureza", q:"25. A unidade de medida de força no SI é:", alt:["Joule","Watt","Newton","Pascal","Ampère"], correta:2 },
+  { area:"Ciências da Natureza", q:"26. O DNA é formado por:", alt:["Apenas proteínas.","Nucleotídeos (bases nitrogenadas, açúcar e fosfato).","Aminoácidos.","Lipídios.","Carboidratos simples."], correta:1 },
+  { area:"Ciências da Natureza", q:"27. A Lei de Lavoisier diz que:", alt:["A energia se transforma.","Na natureza nada se cria, nada se perde, tudo se transforma.","A força é massa vezes aceleração.","Todo corpo submerso recebe empuxo.","A entropia do universo aumenta."], correta:1 },
+  { area:"Ciências da Natureza", q:"28. O efeito estufa é intensificado principalmente pela emissão de:", alt:["Oxigênio","Nitrogênio","Dióxido de carbono (CO₂)","Hélio","Neônio"], correta:2 },
+  { area:"Ciências da Natureza", q:"29. A cadeia alimentar inicia-se geralmente pelos:", alt:["Decompositores","Consumidores primários","Produtores (plantas)","Consumidores terciários","Predadores de topo"], correta:2 },
+  { area:"Ciências da Natureza", q:"30. A velocidade da luz no vácuo é aproximadamente:", alt:["3.000 km/s","300.000 km/s","30.000 km/s","3.000.000 km/s","300 km/s"], correta:1 },
+
+  // MATEMÁTICA (10)
+  { area:"Matemática", q:"31. Se x + 5 = 12, então x é:", alt:["5","6","7","8","9"], correta:2 },
+  { area:"Matemática", q:"32. A área de um triângulo de base 10 e altura 6 é:", alt:["30","60","16","36","20"], correta:0 },
+  { area:"Matemática", q:"33. A média aritmética de 4, 6, 8 e 10 é:", alt:["6","7","8","9","10"], correta:1 },
+  { area:"Matemática", q:"34. O valor de 2³ + 3² é:", alt:["17","15","13","19","21"], correta:0 },
+  { area:"Matemática", q:"35. Se um produto custa R$ 80,00 e recebe 25% de desconto, o novo preço é:", alt:["R$ 60,00","R$ 55,00","R$ 65,00","R$ 70,00","R$ 50,00"], correta:0 },
+  { area:"Matemática", q:"36. A raiz quadrada de 144 é:", alt:["10","11","12","13","14"], correta:2 },
+  { area:"Matemática", q:"37. Em uma progressão aritmética de razão 3, começando em 2, o 5º termo é:", alt:["12","14","15","16","17"], correta:1 },
+  { area:"Matemática", q:"38. A probabilidade de sair cara ao lançar uma moeda é:", alt:["1/4","1/3","1/2","2/3","1"], correta:2 },
+  { area:"Matemática", q:"39. O perímetro de um quadrado de lado 7 é:", alt:["14","21","28","35","49"], correta:2 },
+  { area:"Matemática", q:"40. O valor de 15% de 200 é:", alt:["15","20","25","30","35"], correta:3 }
+];
+
+// ============ RENDER ============
+const container = document.getElementById('questoesContainer');
+let areaAtual = "";
+questoes.forEach((q, i) => {
+  if (q.area !== areaAtual) {
+    areaAtual = q.area;
+    const h = document.createElement('div');
+    h.className = 'area';
+    h.innerHTML = `<h2>${areaAtual}</h2>`;
+    container.appendChild(h);
+  }
+  const div = document.createElement('div');
+  div.className = 'questao';
+  div.innerHTML = `<div class="enunciado">${q.q}</div>
+    <div class="alternativas">
+      ${q.alt.map((a, j) => `<label><input type="radio" name="q${i}" value="${j}"> ${String.fromCharCode(65+j)}) ${a}</label>`).join('')}
+    </div>`;
+  container.appendChild(div);
+});
+
+// ============ FINALIZAR ============
+function finalizarSimulado() {
+  const nome = document.getElementById('nomeAluno').value.trim() || "Aluno(a)";
+  const turma = document.getElementById('turmaAluno').value.trim() || "—";
+  const redacao = document.getElementById('redacao').value.trim();
+
+  let acertos = 0;
+  const respostas = [];
+  questoes.forEach((q, i) => {
+    const sel = document.querySelector(`input[name="q${i}"]:checked`);
+    const marcada = sel ? parseInt(sel.value) : -1;
+    const acertou = marcada === q.correta;
+    if (acertou) acertos++;
+    respostas.push({ i, q, marcada, acertou });
+  });
+
+  const nota = (acertos / 40 * 100).toFixed(1);
+
+  // Tela
+  const res = document.getElementById('resultado');
+  res.style.display = 'block';
+  document.getElementById('notaFinal').textContent = `Acertos: ${acertos}/40 — Nota: ${nota}%`;
+  let det = `<div class="linha"><span><strong>Aluno:</strong> ${nome}</span><span><strong>Turma:</strong> ${turma}</span></div>`;
+  det += `<div class="linha"><span><strong>Redação:</strong> ${redacao ? redacao.split(/\s+/).length + " palavras" : "Não preenchida"}</span><span><strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}</span></div>`;
+  respostas.forEach(r => {
+    det += `<div class="gabarito-item">Q${r.i+1}: marcou ${r.marcada>=0?String.fromCharCode(65+r.marcada):'—'} | correta ${String.fromCharCode(65+r.q.correta)} 
+      <span class="${r.acertou?'certa':'errada'}">${r.acertou?'✔':'�’'}</span></div>`;
+  });
+  document.getElementById('detalhes').innerHTML = det;
+
+  // ============ PDF ============
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  let y = 15;
+  const margin = 15;
+  const pageW = 210;
+  const maxW = pageW - margin*2;
+
+  function addLinha(texto, size=10, bold=false, cor=[0,0,0]) {
+    doc.setFontSize(size);
+    doc.setFont("helvetica", bold ? "bold" : "normal");
+    doc.setTextColor(...cor);
+    const linhas = doc.splitTextToSize(texto, maxW);
+    linhas.forEach(l => {
+      if (y > 280) { doc.addPage(); y = 15; }
+      doc.text(l, margin, y);
+      y += size * 0.5;
+    });
+  }
+
+  // Cabeçalho
+  doc.setFillColor(26, 61, 109);
+  doc.rect(0, 0, 210, 22, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(16); doc.setFont("helvetica","bold");
+  doc.text("RELATÓRIO DE SIMULADO ENEM", 105, 10, { align: 'center' });
+  doc.setFontSize(10);
+  doc.text("40 Questões + Redação", 105, 17, { align: 'center' });
+  y = 32;
+
+  addLinha(`Aluno: ${nome}`, 12, true, [26,61,109]);
+  addLinha(`Turma: ${turma}`, 10);
+  addLinha(`Data: ${new Date().toLocaleString('pt-BR')}`, 10);
+  y += 4;
+
+  // Resumo
+  doc.setDrawColor(26,61,109);
+  doc.setFillColor(238,244,255);
+  doc.rect(margin, y, maxW, 18, 'FD');
+  doc.setTextColor(26,61,109);
+  doc.setFontSize(13); doc.setFont("helvetica","bold");
+  doc.text(`RESULTADO: ${acertos}/40 acertos  —  Nota: ${nota}%`, margin+5, y+11);
+  y += 26;
+
+  // Desempenho por área
+  addLinha("DESEMPENHO POR ÁREA", 12, true, [26,61,109]);
+  const areas = {};
+  respostas.forEach(r => {
+    if (!areas[r.q.area]) areas[r.q.area] = { total:0, acertos:0 };
+    areas[r.q.area].total++;
+    if (r.acertou) areas[r.q.area].acertos++;
+  });
+  Object.keys(areas).forEach(a => {
+    const pct = (areas[a].acertos / areas[a].total * 100).toFixed(0);
+    addLinha(`• ${a}: ${areas[a].acertos}/${areas[a].total} (${pct}%)`, 10);
+  });
+  y += 4;
+
+  // Gabarito detalhado
+  addLinha("GABARITO DETALHADO", 12, true, [26,61,109]);
+  respostas.forEach(r => {
+    const marc = r.marcada >= 0 ? String.fromCharCode(65+r.marcada) : "—";
+    const corr = String.fromCharCode(65+r.q.correta);
+    const status = r.acertou ? "ACERTOU" : "ERROU";
+    const cor = r.acertou ? [26,127,55] : [198,40,40];
+    doc.setFontSize(9);
+    doc.setFont("helvetica","normal");
+    doc.setTextColor(40,40,40);
+    if (y > 285) { doc.addPage(); y = 15; }
+    doc.text(`Q${r.i+1}: marcou ${marc} | correta ${corr}`, margin, y);
+    doc.setTextColor(...cor);
+    doc.setFont("helvetica","bold");
+    doc.text(status, margin + 85, y);
+    y += 5;
+  });
+
+  // Redação
+  y += 6;
+  if (y > 260) { doc.addPage(); y = 15; }
+  addLinha("REDAÇÃO", 12, true, [26,61,109]);
+  addLinha("Tema: O desafio da inclusão digital no Brasil contemporâneo", 10, true);
+  y += 2;
+  if (redacao) {
+    const linhas = doc.splitTextToSize(redacao, maxW);
+    linhas.forEach(l => {
+      if (y > 280) { doc.addPage(); y = 15; }
+      doc.setFontSize(10); doc.setFont("helvetica","normal"); doc.setTextColor(40,40,40);
+      doc.text(l, margin, y);
+      y += 5;
+    });
+  } else {
+    addLinha("(Redação não preenchida pelo aluno)", 10, false, [150,0,0]);
+  }
+
+  // Rodapé
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setFontSize(8); doc.setTextColor(120,120,120); doc.setFont("helvetica","normal");
+    doc.text(`Simulado ENEM — Página ${p} de ${totalPages}`, 105, 292, { align: 'center' });
+  }
+
+  doc.save(`Simulado_${nome.replace(/\s+/g,'_')}.pdf`);
+  document.getElementById('finalizarBtn').textContent = "✔ PDF gerado — enviar ao professor";
+}
+</script>
+</body>
+</html>
